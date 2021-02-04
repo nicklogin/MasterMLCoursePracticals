@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[11]:
-
-
 import pandas as pd
 import numpy as np
 
@@ -12,8 +9,6 @@ from functools import partial
 
 
 # 1. Use the Tree data structure below; write code to build the tree from figure 1.2 in Daumé.
-
-# In[12]:
 
 
 class Tree:
@@ -60,15 +55,9 @@ class Tree:
     return max([x.depth() for x in self.children()], default=0) + 1
 
 
-# In[13]:
-
-
 ## create leaves:
 l1, l2, l3, l4, l5 = (Tree.leaf("like"), Tree.leaf("like"),
 Tree.leaf('nah'), Tree.leaf("nah"), Tree.leaf("like"))
-
-
-# In[14]:
 
 
 node1 = Tree(data="morning?", left=l2, right=l3)
@@ -78,8 +67,6 @@ root = Tree(data="isSystems?", left=l1, right=node3)
 
 
 # 2. In your python code, load the following dataset and add a boolean "ok" column, where "True" means the rating is non-negative and "False" means the rating is negative.
-
-# In[15]:
 
 
 csv_string = """rating,easy,ai,systems,theory,morning
@@ -104,23 +91,12 @@ csv_string = """rating,easy,ai,systems,theory,morning
 -2,True,False,True,False,False
 -2,True,False,True,False,True"""
 
-
-# In[16]:
-
-
 df = pd.read_csv(StringIO(csv_string))
-
-
-# In[17]:
-
 
 df["ok"] = df["rating"] >= 0
 
 
 # 3. Write a function which takes a feature and computes the performance of the corresponding single-feature classifier:
-
-# In[18]:
-
 
 def single_feature_score(data, goal, feature):
   pos_class = goal[data[feature] == True].value_counts().argmax()
@@ -135,23 +111,14 @@ def single_feature_score(data, goal, feature):
 
 # Use this to find the best feature:
 
-# In[19]:
-
 
 def best_feature(data, goal, features):
   # optional: avoid the lambda using `functools.partial`
   return max(features, key=lambda f: single_feature_score(data, goal, f))
 
 
-# In[20]:
-
-
 X = df.drop(["ok","rating"], axis=1)
 y = df["ok"]
-
-
-# In[22]:
-
 
 print(f"The best feature for single-feature classifier is '{best_feature(X, y, X.columns)}''")
 
@@ -160,23 +127,14 @@ print(f"The best feature for single-feature classifier is '{best_feature(X, y, X
 
 # We can see that the best feature is "systems". Now. let's look at other features:
 
-# In[23]:
-
 
 def feature_scores(data, goal, features):
     return sorted([(feat, single_feature_score(data, goal, feat)) for feat in features],
     key=lambda x: x[1])
 
 
-# In[24]:
-
-
 score_dict = feature_scores(X, y, X.columns)
 print(f"Scores for the features in the decision tree: {score_dict}")
-
-
-# In[37]:
-
 
 best_performance  = max(score_dict, key = lambda x: x[1])[1]
 
@@ -186,9 +144,6 @@ best_performance  = max(score_dict, key = lambda x: x[1])[1]
 # 4. Implement the DecisionTreeTrain and DecisionTreeTest algorithms from Daumé, returning Trees. (Note: our dataset and his are different; we won't get the same tree.)
 # 
 # How does the performance compare to the single-feature classifiers?
-
-# In[26]:
-
 
 def nanz(x):
     if np.isnan(x):
@@ -216,15 +171,7 @@ def decision_tree_train(X, y, features):
         right = decision_tree_train(X_yes, y_yes, [f for f in features if f!=feat])
         return Tree(data=feat, left=left, right=right)
 
-
-# In[27]:
-
-
 t = decision_tree_train(X, y, list(X.columns))
-
-
-# In[28]:
-
 
 def decision_tree_test(tree, test_point):
     if tree.right is None and tree.left is None:
@@ -235,22 +182,10 @@ def decision_tree_test(tree, test_point):
         else:
             return decision_tree_test(tree.right, test_point)
 
-
-# In[29]:
-
-
 predict = lambda x: decision_tree_test(t, x)
 predicted = X.apply(predict, axis=1)
 
-
-# In[30]:
-
-
 improved_performance = (predicted == y).mean()
-
-
-# In[40]:
-
 
 print(f"Now the performance is {improved_performance} which is by {improved_performance-best_performance} higher than the best single-feature performance.")
 
@@ -258,14 +193,6 @@ print(f"Now the performance is {improved_performance} which is by {improved_perf
 # Now the score is higher by 5%
 
 # 5. Add an optional maxdepth parameter to DecisionTreeTrain, which limits the depth of the tree produced. Plot performance against maxdepth.
-
-# In[86]:
-
-
-def nanz(x):
-    if np.isnan(x):
-        return 0
-    return x
 
 def decision_tree_train(X, y, features, max_depth, depth=0):
     guess = y.value_counts().argmax()
@@ -288,10 +215,6 @@ def decision_tree_train(X, y, features, max_depth, depth=0):
         right = decision_tree_train(X_yes, y_yes, [f for f in features if f!=feat], max_depth, depth+1)
         return Tree(data=feat, left=left, right=right)
 
-
-# In[91]:
-
-
 def predict(tree, X):
     predictor = lambda x: decision_tree_test(tree, x)
     return X.apply(predictor, axis=1)
@@ -304,19 +227,8 @@ features = list(X.columns)
 depth = [i for i in range(len(features)+1)]
 score = [score(decision_tree_train(X, y, features, i), X, y) for i in depth]
 
-
-# In[97]:
-
-
 import matplotlib.pyplot as plt
 plt.plot(depth, score)
 plt.xlabel("depth")
 plt.ylabel("accuracy")
 plt.show()
-
-
-# In[ ]:
-
-
-
-

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 from io import StringIO
 from functools import partial
@@ -13,7 +13,6 @@ from functools import partial
 
 class Tree:
   '''Create a binary tree; keyword-only arguments `data`, `left`, `right`.
-
   Examples:
     l1 = Tree.leaf("leaf1")
     l2 = Tree.leaf("leaf2")
@@ -99,8 +98,8 @@ df["ok"] = df["rating"] >= 0
 # 3. Write a function which takes a feature and computes the performance of the corresponding single-feature classifier:
 
 def single_feature_score(data, goal, feature):
-  pos_class = goal[data[feature] == True].value_counts().argmax()
-  neg_class = goal[data[feature] == False].value_counts().argmax()
+  pos_class = goal[data[feature] == True].value_counts().idxmax()
+  neg_class = goal[data[feature] == False].value_counts().idxmax()
   clf = lambda x: pos_class if x else neg_class
 
   predicted = data[feature].apply(clf)
@@ -151,7 +150,7 @@ def nanz(x):
     return x
 
 def decision_tree_train(X, y, features):
-    guess = y.value_counts().argmax()
+    guess = y.value_counts().idxmax()
     if len(y.unique()) == 1 or not features:
         return Tree.leaf(guess)
     else:
@@ -160,7 +159,7 @@ def decision_tree_train(X, y, features):
             no = X[feat] == False
             yes = X[feat] == True
             score[feat] = nanz(y[no].value_counts().max())+nanz(y[yes].value_counts().max())
-        feat = pd.Series(score).argmax()
+        feat = pd.Series(score).idxmax()
         no = X[feat] == False
         yes = X[feat] == True
         X_no, y_no = X[no], y[no]
@@ -195,7 +194,7 @@ print(f"Now the performance is {improved_performance} which is by {improved_perf
 # 5. Add an optional maxdepth parameter to DecisionTreeTrain, which limits the depth of the tree produced. Plot performance against maxdepth.
 
 def decision_tree_train(X, y, features, max_depth, depth=0):
-    guess = y.value_counts().argmax()
+    guess = y.value_counts().idxmax()
     if len(y.unique()) == 1 or not features or depth==max_depth:
         return Tree.leaf(guess)
     else:
@@ -204,7 +203,7 @@ def decision_tree_train(X, y, features, max_depth, depth=0):
             no = X[feat] == False
             yes = X[feat] == True
             score[feat] = nanz(y[no].value_counts().max())+nanz(y[yes].value_counts().max())
-        feat = pd.Series(score).argmax()
+        feat = pd.Series(score).idxmax()
         no = X[feat] == False
         yes = X[feat] == True
         X_no, y_no = X[no], y[no]
@@ -227,7 +226,6 @@ features = list(X.columns)
 depth = [i for i in range(len(features)+1)]
 score = [score(decision_tree_train(X, y, features, i), X, y) for i in depth]
 
-import matplotlib.pyplot as plt
 plt.plot(depth, score)
 plt.xlabel("depth")
 plt.ylabel("accuracy")
